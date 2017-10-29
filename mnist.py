@@ -2,6 +2,8 @@ import keras
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 from sklearn import datasets, model_selection, preprocessing
+import numpy as np
+np.random.seed(100)
 
 mnist = datasets.load_digits(10)
 

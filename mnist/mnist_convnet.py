@@ -1,4 +1,4 @@
-import keras
+import keras.utils
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D
 from sklearn import datasets, model_selection, preprocessing

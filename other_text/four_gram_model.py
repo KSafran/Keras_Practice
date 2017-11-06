@@ -36,4 +36,10 @@ model.compile(optimizer = 'rmsprop',
 
 target = to_categorical(trainData[:,-1], num_classes = 251)
 
-model.fit(trainData[:, [0,1,2]], target, epochs = 10, batch_size = 200)
+model.fit(trainData[:, [0,1,2]], target, epochs = 4, batch_size = 1000)
+
+# Now check accuracy on test data
+test_target = to_categorical(validData[:, -1], num_classes = 251)
+score = model.validate(x_test, y_test)
+print('''The out of sample cross entropy is %.3f and the out 
+	of sample accuracy is %.3f''' % (score[0], score[1]))

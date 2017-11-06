@@ -43,3 +43,14 @@ test_target = to_categorical(validData[:, -1], num_classes = 251)
 score = model.validate(x_test, y_test)
 print('''The out of sample cross entropy is %.3f and the out 
 	of sample accuracy is %.3f''' % (score[0], score[1]))
+
+# Can we see anything from our embedding layer?
+from keras import backend as K
+
+get_embedding = K.function([model.layers[0].input],
+                                  [model.layers[0].output])
+
+# shape isn't working here
+# the tensor input should have dimension [None, 3]
+# not sure what none means.
+layer_output = get_embedding([trainData[1,:-1].reshape([1,3])])

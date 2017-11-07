@@ -73,3 +73,15 @@ def word_associations(index, embeddings, vocabulary):
 	words = [vocabulary[0][index].item()]
 	words.append([vocabulary[0][j].item() for j in indices])
 	return(words)
+
+print('here are some examples of words that are associated with similar words')
+print(word_associations(90, all_embeddings, vocab))
+print(word_associations(10, all_embeddings, vocab))
+
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
+word_tsne = TSNE(n_components = 2)
+two_d_embedding = word_tsne.fit_transform(np.array(all_embeddings))
+plt.scatter(two_d_embedding[:,0], two_d_embedding[:,1])
+plt.show()

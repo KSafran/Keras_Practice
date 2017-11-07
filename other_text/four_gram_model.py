@@ -34,12 +34,13 @@ model.compile(optimizer = 'rmsprop',
 	loss = 'categorical_crossentropy',
 	metrics = ['accuracy'])
 
-target = to_categorical(trainData[:,-1], num_classes = 250)
+#really only 250 classes, but the indices start at 1
+target = to_categorical(trainData[:,-1], num_classes = 251)
 
 model.fit(trainData[:, [0,1,2]], target, epochs = 4, batch_size = 1000)
 
 # Now check accuracy on test data
-test_target = to_categorical(validData[:, -1], num_classes = 250)
+test_target = to_categorical(validData[:, -1], num_classes = 251)
 score = model.evaluate(validData[:, :-1], test_target)
 print('''The out of sample cross entropy is %.3f and the out 
 	of sample accuracy is %.3f''' % (score[0], score[1]))
@@ -59,14 +60,15 @@ def get_emb_index(ind):
 	embedding_output = get_embedding([np.array([ind, ind, ind], ndmin = 2)])
 	return(embedding_output[0][0,0,:])
 
-all_embeddings = [get_embedding(i) for i in range(252)]
+# remember, word indexes start at 1
+all_embeddings = [get_emb_index(i) for i in range(1, 251)]
 
 def closest_word(index, embeddings):
-	distances = [np.linalg.norm(embeddings[index] - embeddings[i]) for i in range(251)]
+	distances = [np.linalg.norm(embeddings[index] - embeddings[i]) for i in range(249)]
 	ordering = np.argsort(distances)
 	return(ordering[1:6])
 
-def word_cloud(index, embeddings, vocabulary):
+def word_associations(index, embeddings, vocabulary):
 	indices = closest_word(index, embeddings)
 	words = [vocabulary[0][index].item()]
 	words.append([vocabulary[0][j].item() for j in indices])

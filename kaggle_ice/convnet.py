@@ -10,7 +10,7 @@ train_data, test_data = train_test_split(iceberg, train_size = .7)
 
 model = Sequential()
 
-model.add(Conv2D(50, (3,3), activation = 'relu', input_shap =((75,75,2))))
+model.add(Conv2D(50, (3,3), activation = 'relu', input_shape =((75,75,2))))
 model.add(MaxPooling2D((2, 2)))
 model.add(Conv2D(25, (3,3), activation = 'relu'))
 model.add(MaxPooling2D((2, 2)))

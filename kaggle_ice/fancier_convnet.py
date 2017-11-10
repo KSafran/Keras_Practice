@@ -3,30 +3,59 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
+from keras.optimizers import Adam
 
 iceberg = pd.read_json('data/train.json')
 
-train_data, test_data = train_test_split(iceberg, train_size = .7)
+train_data, test_data = train_test_split(iceberg, train_size = .7, random_state = 100)
 
 model = Sequential()
 
-model.add(Conv2D(50, (3,3), activation = 'relu', input_shape =((75,75,2))))
+# Note - using elu rather than relu seems to improve thigs
+# this keeps neurons from 'dying', they still have a gradient when
+# the input is negative
+
+# quite a bit of improvment from adding these layers with 
+# more nodes
+model.add(Conv2D(200, (3,3), activation = 'elu', input_shape =((75,75,2))))
 model.add(MaxPooling2D((2, 2)))
-model.add(Conv2D(25, (3,3), activation = 'relu'))
+model.add(Dropout(0.2))
+model.add(Conv2D(100, (3,3), activation = 'elu'))
 model.add(MaxPooling2D((2, 2)))
+model.add(Dropout(0.2))
+model.add(Conv2D(50, (3,3), activation = 'elu'))
+model.add(MaxPooling2D((2, 2)))
+model.add(Dropout(0.2))
 model.add(Flatten())
+
+# Let's add layers!!!
+model.add(Dense(50, activation = 'elu'))
+model.add(Dropout(0.2))
+model.add(Dense(20, activation = 'elu'))
+
 model.add(Dense(1, activation = 'sigmoid'))
 
-model.compile(optimizer = 'rmsprop', loss = 'binary_crossentropy',
+# using this adam optimizer seems very popular
+adam_optimizer = mypotim=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+
+model.compile(optimizer = adam_optimizer, loss = 'binary_crossentropy',
  metrics = ['accuracy'])
 
 # format data for model
-
-band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in train_data.band_1])
-band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in train_data.band_2])
-both_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
+def shape_data(df):
+	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
+	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
+	both_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
 	band_1[:, :, :, np.newaxis]), axis = 3)
+	return(both_bands_train)
+
+x_train = shape_data(train_data)
+x_test = shape_data(test_data)
 
 train_target = train_data.is_iceberg
+test_target = test_data.is_iceberg
 
-model.fit(both_bands_train, train_target)
+model.fit(x_train, train_target, epochs = 5, batch_size = 100)
+
+print(model.evaluate(x_test, test_target))
+# benchmark accuracy of 44%, not great

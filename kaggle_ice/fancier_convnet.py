@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
 
 iceberg = pd.read_json('data/train.json')
 
@@ -64,7 +65,9 @@ x_test = normalize_image(x_test)
 train_target = train_data.is_iceberg
 test_target = test_data.is_iceberg
 
-model.fit(x_train, train_target, epochs = 5, batch_size = 100)
+model.fit(x_train, train_target, epochs = 5, batch_size = 100,
+	callbacks = [ModelCheckpoint('data/model_weights.hdf5')],
+	validation_data = (x_test, test_target))
 
 print(model.evaluate(x_test, test_target))
 # Decent improvement so far, up to 71% test set

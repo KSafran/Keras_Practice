@@ -17,7 +17,7 @@ model = Sequential()
 
 # quite a bit of improvment from adding these layers with 
 # more nodes
-model.add(Conv2D(200, (3,3), activation = 'elu', input_shape =((75,75,2))))
+model.add(Conv2D(100, (4,4), activation = 'elu', input_shape =((75,75,2))))
 model.add(MaxPooling2D((2, 2)))
 model.add(Dropout(0.2))
 model.add(Conv2D(100, (3,3), activation = 'elu'))
@@ -52,10 +52,19 @@ def shape_data(df):
 x_train = shape_data(train_data)
 x_test = shape_data(test_data)
 
+# We should normalize this data a bi
+# min and max are around -45, 35, with mean -20
+
+def normalize_image(array):
+	return((array + 20) / 40)
+
+x_train = normalize_image(x_train)
+x_test = normalize_image(x_test)
+
 train_target = train_data.is_iceberg
 test_target = test_data.is_iceberg
 
 model.fit(x_train, train_target, epochs = 5, batch_size = 100)
 
 print(model.evaluate(x_test, test_target))
-# benchmark accuracy of 44%, not great
+# Decent improvement so far, up to 71% test set

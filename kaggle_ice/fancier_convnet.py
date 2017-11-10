@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
+from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
 
 iceberg = pd.read_json('data/train.json')

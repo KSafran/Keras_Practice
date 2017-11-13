@@ -6,8 +6,7 @@ from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 
-#submission_data = pd.read_json('data/test.json')
-
+score_data_location = 'data/train.json'
 model = Sequential()
 
 # Note - using elu rather than relu seems to improve thigs
@@ -60,7 +59,16 @@ def normalize_image(array):
 
 model.load_weights('data/model_weights.hdf5')
 
+submission_data = pd.read_json(score_data_location)
+submission = pd.DataFrame()
+submission['id'] = submission_data['id']
+submission_data = shape_data(submission_data)
+submission_data = normalize_image(submission_data)
 
 results = model.predict_proba(submission_data)
+results = results.reshape(results.shape[0])
+
+submission['is_iceberg'] = results
+#submission.to_csv('data/submission.csv', index = False)
 #print(model.evaluate(x_test, test_target))
 # Decent improvement so far, up to 71% test set

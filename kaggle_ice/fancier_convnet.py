@@ -65,8 +65,14 @@ x_test = normalize_image(x_test)
 train_target = train_data.is_iceberg
 test_target = test_data.is_iceberg
 
+# These callbacks should help with overfitting
+def get_callbacks(filepath, patience = 2):
+	early_stop = EarlyStopping('val_loss', patience = patience)
+	model_save = ModelCheckpoint(filepath, save_best_only = True)
+	return([early_stop, model_save])
+
 model.fit(x_train, train_target, epochs = 25, batch_size = 100,
-	callbacks = [ModelCheckpoint('data/model_weights.hdf5')],
+	callbacks = get_callbacks('data/model_weights.hdf5'),
 	validation_data = (x_test, test_target))
 
 print(model.evaluate(x_test, test_target))

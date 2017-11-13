@@ -6,9 +6,7 @@ from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 
-iceberg = pd.read_json('data/train.json')
-
-train_data, test_data = train_test_split(iceberg, train_size = .7, random_state = 100)
+#submission_data = pd.read_json('data/test.json')
 
 model = Sequential()
 
@@ -50,8 +48,7 @@ def shape_data(df):
 	band_1[:, :, :, np.newaxis]), axis = 3)
 	return(both_bands_train)
 
-x_train = shape_data(train_data)
-x_test = shape_data(test_data)
+#submission_data = shape_data(submission_data)
 
 # We should normalize this data a bi
 # min and max are around -45, 35, with mean -20
@@ -59,15 +56,11 @@ x_test = shape_data(test_data)
 def normalize_image(array):
 	return((array + 20) / 40)
 
-x_train = normalize_image(x_train)
-x_test = normalize_image(x_test)
+#submission_data = normalize_image(submission_data)
 
-train_target = train_data.is_iceberg
-test_target = test_data.is_iceberg
+model.load_weights('data/model_weights.hdf5')
 
-model.fit(x_train, train_target, epochs = 25, batch_size = 100,
-	callbacks = [ModelCheckpoint('data/model_weights.hdf5')],
-	validation_data = (x_test, test_target))
 
-print(model.evaluate(x_test, test_target))
+results = model.predict_proba(submission_data)
+#print(model.evaluate(x_test, test_target))
 # Decent improvement so far, up to 71% test set

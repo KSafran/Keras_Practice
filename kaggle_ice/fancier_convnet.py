@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 iceberg = pd.read_json('data/train.json')
 

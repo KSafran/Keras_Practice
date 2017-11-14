@@ -8,7 +8,7 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 
 iceberg = pd.read_json('data/train.json')
 
-train_data, test_data = train_test_split(iceberg, train_size = .7, random_state = 100)
+train_data, test_data = train_test_split(iceberg, train_size = .75, random_state = 100)
 
 model = Sequential()
 
@@ -16,23 +16,37 @@ model = Sequential()
 # this keeps neurons from 'dying', they still have a gradient when
 # the input is negative
 
-# quite a bit of improvment from adding these layers with 
-# more nodes
-model.add(Conv2D(100, (4,4), activation = 'elu', input_shape =((75,75,2))))
-model.add(MaxPooling2D((2, 2)))
+# Try copying this guy's layers to see if that is the issue
+# hypothesis 1, adding the third channel really matters
+# hypothesis 2, this guy's exact model architecture matters - doesn't help
+# hypothesis 3, relu is better than elu
+# hypothesis 4, batch sizes? - doesn't help
+# 5 just some bug I'm missing.
+
+model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,2))))
+model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 model.add(Dropout(0.2))
-model.add(Conv2D(100, (3,3), activation = 'elu'))
-model.add(MaxPooling2D((2, 2)))
+
+model.add(Conv2D(128, (3,3), activation = 'elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
-model.add(Conv2D(50, (3,3), activation = 'elu'))
-model.add(MaxPooling2D((2, 2)))
+
+model.add(Conv2D(128, (3,3), activation = 'elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
+
+model.add(Conv2D(64, kernel_size=(3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+model.add(Dropout(0.2))
+
 model.add(Flatten())
 
 # Let's add layers!!!
-model.add(Dense(50, activation = 'elu'))
+model.add(Dense(512, activation = 'elu'))
 model.add(Dropout(0.2))
-model.add(Dense(20, activation = 'elu'))
+
+model.add(Dense(256, activation = 'elu'))
+model.add(Dropout(0.2))
 
 model.add(Dense(1, activation = 'sigmoid'))
 
@@ -71,7 +85,7 @@ def get_callbacks(filepath, patience = 2):
 	model_save = ModelCheckpoint(filepath, save_best_only = True)
 	return([early_stop, model_save])
 
-model.fit(x_train, train_target, epochs = 25, batch_size = 100,
+model.fit(x_train, train_target, epochs = 25, batch_size = 24,
 	callbacks = get_callbacks('data/model_weights.hdf5'),
 	validation_data = (x_test, test_target))
 

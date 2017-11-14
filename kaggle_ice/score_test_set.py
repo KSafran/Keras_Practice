@@ -6,30 +6,45 @@ from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 
-score_data_location = 'data/train.json'
+score_data_location = 'data/test.json'
+
 model = Sequential()
 
 # Note - using elu rather than relu seems to improve thigs
 # this keeps neurons from 'dying', they still have a gradient when
 # the input is negative
 
-# quite a bit of improvment from adding these layers with 
-# more nodes
-model.add(Conv2D(100, (4,4), activation = 'elu', input_shape =((75,75,2))))
-model.add(MaxPooling2D((2, 2)))
+# Try copying this guy's layers to see if that is the issue
+# hypothesis 1, adding the third channel really matters
+# hypothesis 2, this guy's exact model architecture matters
+# hypothesis 3, relu is better than elu
+# hypothesis 4, batch sizes?
+# 5 just some bug I'm missing.
+
+model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,2))))
+model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 model.add(Dropout(0.2))
-model.add(Conv2D(100, (3,3), activation = 'elu'))
-model.add(MaxPooling2D((2, 2)))
+
+model.add(Conv2D(128, (3,3), activation = 'elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
-model.add(Conv2D(50, (3,3), activation = 'elu'))
-model.add(MaxPooling2D((2, 2)))
+
+model.add(Conv2D(128, (3,3), activation = 'elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
+
+model.add(Conv2D(64, kernel_size=(3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+model.add(Dropout(0.2))
+
 model.add(Flatten())
 
 # Let's add layers!!!
-model.add(Dense(50, activation = 'elu'))
+model.add(Dense(512, activation = 'elu'))
 model.add(Dropout(0.2))
-model.add(Dense(20, activation = 'elu'))
+
+model.add(Dense(256, activation = 'elu'))
+model.add(Dropout(0.2))
 
 model.add(Dense(1, activation = 'sigmoid'))
 
@@ -69,6 +84,6 @@ results = model.predict_proba(submission_data)
 results = results.reshape(results.shape[0])
 
 submission['is_iceberg'] = results
-#submission.to_csv('data/submission.csv', index = False)
+submission.to_csv('data/submission.csv', index = False)
 #print(model.evaluate(x_test, test_target))
 # Decent improvement so far, up to 71% test set

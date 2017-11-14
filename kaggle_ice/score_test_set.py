@@ -21,7 +21,7 @@ model = Sequential()
 # hypothesis 4, batch sizes?
 # 5 just some bug I'm missing.
 
-model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,2))))
+model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,3))))
 model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
 model.add(Dropout(0.2))
 
@@ -58,9 +58,11 @@ model.compile(optimizer = adam_optimizer, loss = 'binary_crossentropy',
 def shape_data(df):
 	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
 	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
-	both_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
-	band_1[:, :, :, np.newaxis]), axis = 3)
-	return(both_bands_train)
+	band_3 = (band_1 + band_2)/2
+	all_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
+	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis]),
+	axis = 3)
+	return(all_bands_train)
 
 #submission_data = shape_data(submission_data)
 

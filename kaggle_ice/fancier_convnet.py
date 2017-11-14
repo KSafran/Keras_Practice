@@ -23,8 +23,8 @@ model = Sequential()
 # hypothesis 4, batch sizes? - doesn't help
 # 5 just some bug I'm missing.
 
-model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,3))))
-model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,4))))
+model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
 
 model.add(Conv2D(128, (3,3), activation = 'elu'))
@@ -61,8 +61,10 @@ def shape_data(df):
 	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
 	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
 	band_3 = (band_1 + band_2)/2
+	band_4 = band_1 - band_2
 	all_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
-	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis]),
+	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis],
+	band_4[:, :, :, np.newaxis]),
 	axis = 3)
 	return(all_bands_train)
 
@@ -87,9 +89,11 @@ def get_callbacks(filepath, patience = 2):
 	model_save = ModelCheckpoint(filepath, save_best_only = True)
 	return([early_stop, model_save])
 
-model.fit(x_train, train_target, epochs = 25, batch_size = 24,
+model.fit(x_train, train_target, epochs = 25, batch_size = 100,
 	callbacks = get_callbacks('data/model_weights.hdf5'),
 	validation_data = (x_test, test_target))
 
+print(model.evaluate(x_test, test_target))
+model.load_weights('data/model_weights.hdf5')
 print(model.evaluate(x_test, test_target))
 # Decent improvement so far, up to 71% test set

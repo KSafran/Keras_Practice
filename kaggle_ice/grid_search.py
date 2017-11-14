@@ -60,7 +60,7 @@ def get_model(hyper_p):
 def shape_data(df):
 	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
 	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
-	band_3 = (band_1 + band_2)/2
+	band_3 = (band_1 - band_2)
 	all_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
 	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis]),
 	axis = 3)
@@ -102,6 +102,6 @@ for hyp in hyperparameters:
 results = pd.DataFrame({'hyperparameters':hyperparameters,
 	'scores':test_results})
 
-results.to_csv('data/cv_results.csv', index=False)
+results.to_csv('data/cv_results_2.csv', index=False)
 
 # Decent improvement so far, up to 71% test set

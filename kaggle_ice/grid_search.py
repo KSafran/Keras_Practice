@@ -102,6 +102,6 @@ for hyp in hyperparameters:
 results = pd.DataFrame({'hyperparameters':hyperparameters,
 	'scores':test_results})
 
-results.to_csv('data/cv_results_2.csv', index=False)
+results.to_csv('data/cv_results_diff.csv', index=False)
 
 # Decent improvement so far, up to 71% test set

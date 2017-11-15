@@ -24,28 +24,28 @@ def get_model(hyper_p):
 
 	model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0], input_shape =((75,75,3))))
 	model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Conv2D(128, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0]))
 	model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Conv2D(128, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0]))
 	model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation=hyper_p[0]))
 	model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Flatten())
 
 	# Let's add layers!!!
 	model.add(Dense(512, activation = hyper_p[0]))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Dense(256, activation = hyper_p[0]))
-	model.add(Dropout(0.2))
+	model.add(Dropout(0.3))
 
 	model.add(Dense(1, activation = 'sigmoid'))
 
@@ -94,7 +94,7 @@ for i in range(nfolds):
 	y_test = iceberg.loc[iceberg.fold == i, 'is_iceberg']
 
 	
-	model.fit(x_train, y_train, epochs = 1, batch_size = 100,
+	model.fit(x_train, y_train, epochs = 25, batch_size = 100,
 		callbacks = get_callbacks('data/nfold_weights.hdf5'),
 		validation_data = (x_test, y_test))
 	model.load_weights('data/nfold_weights.hdf5')
@@ -102,6 +102,6 @@ for i in range(nfolds):
 
 results = pd.DataFrame({'scores':test_results})
 
-results.to_csv('data/kfold_results_diff.csv', index=False)
-
+results.to_csv('data/kfold_results_diff_d3.csv', index=False)
+print(results)
 # Decent improvement so far, up to 71% test set

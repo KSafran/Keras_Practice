@@ -1,10 +1,6 @@
 from keras.layers import Input, Conv2D, BatchNormalization, Dropout, Dense, MaxPooling2D, Flatten, concatenate, GlobalMaxPooling2D
 from keras.models import Model
 
-# We want to include incidence angle so we need to use the 
-# keras functional api rather than the sequential model
-
-# Model structure inspired by github.com/cttsai1985
 def create_model(nchannels = 2, normalize_batches = False, angle = False):
 	
 	img = Input(shape = (75, 75, nchannels))

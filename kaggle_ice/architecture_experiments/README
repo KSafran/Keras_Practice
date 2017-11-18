@@ -1,10 +1,10 @@
 This folder is for running some experiments on an AWS GPU.
 
-I experiment with different optimizers (Adam and RMSprop) and with different 
-learning rates. It looks like RMSprop with a learninig rate of 0.001 or so is 
-best. I also need to be a bit more patient with the early stopping, the 
-validation errors are fairly volatile. Now I'll move on and do some more
-experimenting with the CNN architecture.
+I experimented with different model architectures. I tried using the 2 channels
+provided, but also a third channel with either the difference between the 2 
+channels or the average of the two. I also tried using batch normalization and
+using the inc_angle. I learned not to use batch normalization. Also, using the
+third channel of the difference between the first two is not a good ideaa.
 
 Directions for setting up AWS experiment
 

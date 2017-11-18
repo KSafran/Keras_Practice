@@ -8,6 +8,7 @@ from keras.callbacks import ModelCheckpoint
 
 score_data_location = 'data/test.json'
 
+hyper_p = ('elu', 3, 2)
 model = Sequential()
 
 # Note - using elu rather than relu seems to improve thigs
@@ -16,35 +17,35 @@ model = Sequential()
 
 # Try copying this guy's layers to see if that is the issue
 # hypothesis 1, adding the third channel really matters
-# hypothesis 2, this guy's exact model architecture matters
+# hypothesis 2, this guy's exact model architecture matters - doesn't help
 # hypothesis 3, relu is better than elu
-# hypothesis 4, batch sizes?
+# hypothesis 4, batch sizes? - doesn't help
 # 5 just some bug I'm missing.
 
-model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,3))))
-model.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
-model.add(Dropout(0.2))
+model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0], input_shape =((75,75,3))))
+model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
+model.add(Dropout(0.3))
 
-model.add(Conv2D(128, (3,3), activation = 'elu'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Dropout(0.2))
+model.add(Conv2D(128, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0]))
+model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
+model.add(Dropout(0.3))
 
-model.add(Conv2D(128, (3,3), activation = 'elu'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Dropout(0.2))
+model.add(Conv2D(128, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0]))
+model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
+model.add(Dropout(0.3))
 
-model.add(Conv2D(64, kernel_size=(3, 3), activation='elu'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Dropout(0.2))
+model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation=hyper_p[0]))
+model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
+model.add(Dropout(0.3))
 
 model.add(Flatten())
 
 # Let's add layers!!!
-model.add(Dense(512, activation = 'elu'))
-model.add(Dropout(0.2))
+model.add(Dense(512, activation = hyper_p[0]))
+model.add(Dropout(0.3))
 
-model.add(Dense(256, activation = 'elu'))
-model.add(Dropout(0.2))
+model.add(Dense(256, activation = hyper_p[0]))
+model.add(Dropout(0.3))
 
 model.add(Dense(1, activation = 'sigmoid'))
 
@@ -58,7 +59,7 @@ model.compile(optimizer = adam_optimizer, loss = 'binary_crossentropy',
 def shape_data(df):
 	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
 	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
-	band_3 = (band_1 + band_2)/2
+	band_3 = (band_1 - band_2)
 	all_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
 	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis]),
 	axis = 3)

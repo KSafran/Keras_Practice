@@ -22,7 +22,7 @@ def get_model(hyper_p):
 	# hypothesis 4, batch sizes? - doesn't help
 	# 5 just some bug I'm missing.
 
-	model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0], input_shape =((75,75,3))))
+	model.add(Conv2D(64, kernel_size=(hyper_p[1],hyper_p[1]), activation = hyper_p[0], input_shape =((75,75,2))))
 	model.add(MaxPooling2D(pool_size=(hyper_p[2],hyper_p[2]), strides=(2, 2)))
 	model.add(Dropout(0.2))
 
@@ -60,9 +60,8 @@ def get_model(hyper_p):
 def shape_data(df):
 	band_1 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_1']])
 	band_2 = np.array([np.array(x).astype(np.float32).reshape(75,75) for x in df['band_2']])
-	band_3 = (band_1 - band_2)
 	all_bands_train = np.concatenate((band_1[:, :, :, np.newaxis], 
-	band_1[:, :, :, np.newaxis], band_3[:, :, :, np.newaxis]),
+	band_1[:, :, :, np.newaxis]),
 	axis = 3)
 	return(all_bands_train)
 
@@ -102,6 +101,6 @@ for i in range(nfolds):
 
 results = pd.DataFrame({'scores':test_results})
 
-results.to_csv('data/kfold_results_diff_c3.csv', index=False)
+results.to_csv('data/kfold_results_2chan.csv', index=False)
 print(results)
 # Decent improvement so far, up to 71% test set

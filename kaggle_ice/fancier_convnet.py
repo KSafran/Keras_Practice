@@ -5,7 +5,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from keras.preprocessing.image import ImageDataGenerator
 
 iceberg = pd.read_json('data/train.json')
 
@@ -25,10 +24,6 @@ model = Sequential()
 # 5 just some bug I'm missing.
 
 model.add(Conv2D(64, (3,3), activation = 'elu', input_shape =((75,75,3))))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Dropout(0.2))
-
-model.add(Conv2D(128, (3,3), activation = 'elu'))
 model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 model.add(Dropout(0.2))
 
@@ -85,18 +80,15 @@ test_target = test_data.is_iceberg
 # We can improve generalization with a data generator
 # this will create "new" images by transforming our 
 # training set
-datagen = ImageDataGenerator(rotation_range=360,
-	horizontal_flip=True,
-	vertical_flip=True)
 
 # These callbacks should help with overfitting
-def get_callbacks(filepath, patience = 2):
+def get_callbacks(filepath, patience = 3):
 	early_stop = EarlyStopping('val_loss', patience = patience)
 	model_save = ModelCheckpoint(filepath, save_best_only = True)
 	return([early_stop, model_save])
 
-model.fit_generator(datagen.flow(x_train, train_target, batch_size = 100), 
-	epochs = 15,	steps_per_epoch = 12,
+model.fit(x_train, train_target, batch_size = 100, 
+	epochs = 25, 
 	callbacks = get_callbacks('data/model_weights.hdf5'),
 	validation_data = (x_test, test_target))
 

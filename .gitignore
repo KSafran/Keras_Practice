@@ -1,4 +1,9 @@
 *.mat
 *.m
+*.csv
+*.hdf5
+*.json
+*.pem
 other_text/data
 kaggle_ice/data
+kaggle_ice/aws_exp/data

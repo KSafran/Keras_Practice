@@ -1,0 +1,22 @@
+This folder is for running some experiments on an AWS GPU.
+
+I experimented with different training options. I want to focus on the batch size
+and the learning rate. After that we can play around with stuff like momentum and 
+maybe take another look at other optimizers.
+
+Directions for setting up AWS experiment
+
+1. Compress this folder to make transportation easier
+2. Start up an EC2 intance, g2.2xlarge has a GPU on it, and is fairly cheap. Use
+the 'deep learning amazon linux AMI'. This has keras, tensorflow, and GPU support
+3. Use git bash to ssh into the EC2 instance. Your command will look something like
+this. 'ssh -i path/to/key.pem ec2-user@my_ec2_instance'
+4. activate the tensorflow_p36 environment 'source activate anaconda3/envs/tensorflow_p36'
+5. use another git bash window to scp the zipped training folder onto the gpu using 
+the following 'scp -i path/to/key.pem path/to/zipped_folder.zip ec2-user@my_ec2_instance:~/'
+6. run the code on the EC2 instance
+7. send the results back to your computer 'scp -i path/to/key.pem 
+ec2-user@my_ec2_instance:~/project/data/*.csv ~/Desktop'
+8. Terminate your EC2 instance before you're out of money
+
+

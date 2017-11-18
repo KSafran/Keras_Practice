@@ -1,81 +1,47 @@
-from keras.layers import Input, Conv2D, BatchNormalization, Dropout, Dense, MaxPooling2D, Flatten, Concatenate, GlobalMaxPooling2D
+from keras.layers import Input, Conv2D, BatchNormalization, Dropout, Dense, MaxPooling2D, Flatten, concatenate, GlobalMaxPooling2D
 from keras.models import Model
 
-# We want to include incidence angle so we need to use the 
-# keras functional api rather than the sequential model
-
-# Model structure inspired by github.com/cttsai1985
-def create_model():
-	image = Input(shape=[75, 75, 2])
-	angle = Input(shape=[1])
-	normalized_image = BatchNormalization()(image)
-
-	# convs1
-	x = Conv2D(filters= 8, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(normalized_image)
-	x = Conv2D(filters= 8, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 8, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = BatchNormalization()(x)
-	x = MaxPooling2D((3, 3), (3,3))(x)
-	x = Dropout(0.2)(x)
-
-	#convs2
-	x = Conv2D(filters= 16, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', 
-		activation = 'elu')(x)
-	x = Conv2D(filters= 16, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 16, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = BatchNormalization()(x)
-	x = MaxPooling2D((3, 3), (2,2))(x)
-	x = Dropout(0.2)(x)
-
-	# convs 3
-	x = Conv2D(filters= 32, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 32, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 32, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = BatchNormalization()(x)
-	x = MaxPooling2D((3, 3), (2,2))(x)
-	x = Dropout(0.2)(x)
-
-	# convs 4
-	x = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x)
-	x = Dropout(0.2)(x)
-	x = GlobalMaxPooling2D()(x)
-	x = BatchNormalization()(x)
+def create_model(nchannels = 2, normalize_batches = False, angle = False):
 	
-	# Second Image Convs
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(normalized_image)
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x2)
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x2)
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x2)
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x2)
-	x2 = Conv2D(filters= 64, kernel_size = (3,3), 
-		strides = (1,1), padding = 'same', activation = 'elu')(x2)
-	x2 = Dropout(0.2)(x2)
-	x2 = GlobalMaxPooling2D()(x2)
-	x2= BatchNormalization()(x2)
+	img = Input(shape = (75, 75, nchannels))
+	
+	x = Conv2D(64, (3,3), activation = 'elu')(img)
+	x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+	x = Dropout(0.2)(x)
+	if normalize_batches:
+		x = BatchNormalization()(x)
 
-	concat = Concatenate()([x, x2, angle])
-	y = Dense(50, activation = 'elu')(concat)
-	y = Dense(10, activation = 'elu')(y)
-	predictions = Dense(1, activation = 'sigmoid')(y)
+	x = Conv2D(128, (3,3), activation = 'elu')(x)
+	x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+	x = Dropout(0.2)(x)
+	if normalize_batches:
+		x = BatchNormalization()(x)
 
-	model = Model(inputs = [image, angle], outputs = predictions)
+	x = Conv2D(64, kernel_size=(3, 3), activation='elu')(x)
+	x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+	x = Dropout(0.2)(x)
+	if normalize_batches:
+		x = BatchNormalization()(x)
+
+	x = Flatten()(x)
+
+	# Let's add layers!!!
+	x = Dense(512, activation = 'elu')(x)
+	x = Dropout(0.2)(x)
+	if normalize_batches:
+		x = BatchNormalization()(x)
+		
+	x = Dense(256, activation = 'elu')(x)
+	x = Dropout(0.2)(x)
+
+	if angle:
+		angle_input = Input(shape = [1])
+
+		both_ins = concatenate([x, angle_input], axis = -1)
+		pred = Dense(1, activation = 'sigmoid')(both_ins)
+		model = Model(inputs = [img, angle_input], outputs = pred)
+	else:
+		pred = Dense(1, activation = 'sigmoid')(x)
+		model = Model(inputs = img, outputs = pred)
+	
 	return(model)

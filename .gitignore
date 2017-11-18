@@ -6,4 +6,5 @@
 *.pem
 other_text/data
 kaggle_ice/data
-kaggle_ice/aws_exp/data
+kaggle_ice/optimizer_experiments/data
+kaggle_ice/architecture_experiments/data

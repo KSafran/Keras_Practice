@@ -1,4 +1,4 @@
-from keras.optimizers import Adam, RMSprop
+from keras.optimizers import Adam, RMSprop, Nadam, SGD
 import numpy as np
 import pandas as pd
 from define_models import create_model
@@ -10,8 +10,8 @@ iceberg = pd.read_json('data/train.json')
 iceberg['inc_angle'] =  iceberg['inc_angle'].replace('na', -1)
 train_data, test_data = train_test_split(iceberg, train_size = .75, random_state = 123)
 
-pars = [(learn, batch) for learn in (0.001, 0.0005, 0.0002) for batch in (12, 24, 36)]
-j = 0
+pars = [(learn, optim) for learn in (0.0002, 0.0001) for optim in ('Adam', 'Nadam', 'RMSprop', 'SGD')]
+j = 10
 # Run Experiments on
 for p in pars:
 
@@ -22,19 +22,27 @@ for p in pars:
 
 	model = create_model(2, False, False)
 
-	optimizer = mypotim=RMSprop(lr=p[0])
+	if p[1] == 'Adam':
+		optimizer = Adam(lr = p[0])
+	elif p[1] == 'Nadam':
+		optimizer = Nadam(lr = p[0])
+	elif p[1] == 'RMSprop':
+		optimizer = RMSprop(lr = p[0])
+	elif p[1] == 'SGD':
+		optimizer = SGD(lr = p[0])
+
 	model.compile(optimizer = optimizer, loss = 'binary_crossentropy',
 	 metrics = ['accuracy'])
 
 	hist = model.fit(train_images, 
 		train_data.is_iceberg,
 		epochs = 1,
-		batch_size = p[1],
+		batch_size = 36,
 		callbacks = get_callbacks('data/train_weights_' + str(j) + '.hdf5', 6),
 		validation_data = (test_images, test_data.is_iceberg))
 
 	results = pd.DataFrame(hist.history)
 	results['learn'] = p[0]
-	results['batch_size'] = p[1]
+	results['optim'] = p[1]
 
 	results.to_csv('data/hist_' + str(j) + '.csv')

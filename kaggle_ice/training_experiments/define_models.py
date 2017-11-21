@@ -17,6 +17,12 @@ def create_model(nchannels = 2, normalize_batches = False, angle = False):
 	if normalize_batches:
 		x = BatchNormalization()(x)
 
+	x = Conv2D(128, (3,3), activation = 'elu')(x)
+	x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
+	x = Dropout(0.2)(x)
+	if normalize_batches:
+		x = BatchNormalization()(x)
+
 	x = Conv2D(64, kernel_size=(3, 3), activation='elu')(x)
 	x = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(x)
 	x = Dropout(0.2)(x)
@@ -27,12 +33,12 @@ def create_model(nchannels = 2, normalize_batches = False, angle = False):
 
 	# Let's add layers!!!
 	x = Dense(512, activation = 'elu')(x)
-	x = Dropout(0.2)(x)
+	x = Dropout(0.4)(x)
 	if normalize_batches:
 		x = BatchNormalization()(x)
 		
 	x = Dense(256, activation = 'elu')(x)
-	x = Dropout(0.2)(x)
+	x = Dropout(0.4)(x)
 
 	if angle:
 		angle_input = Input(shape = [1])

@@ -8,12 +8,11 @@ from keras.callbacks import ModelCheckpoint
 from utilities import get_image_tensor
 from define_models import create_model
 
-score_data_location = 'data/test.hdf'
+score_data_location = '../architecture_experiments/data/test.hdf'
 
-hyper_p = ('elu', 3, 2)
-model = create_model(2, False, False)
+model = create_model(3, False, False)
 
-model.load_weights('data/train_weightsnone_.hdf5')
+model.load_weights('data/train_weights_22.hdf5')
 
 model.compile(optimizer = Adam(), loss = 'binary_crossentropy',
 	metrics = ['accuracy'])
@@ -22,7 +21,7 @@ submission_data = pd.read_hdf(score_data_location)
 #submission_data.to_hdf('data/test.hdf', 'data', mode = 'w')
 submission = pd.DataFrame()
 submission['id'] = submission_data['id']
-submission_data = get_image_tensor(submission_data, extra_channel = 'none')
+submission_data = get_image_tensor(submission_data, extra_channel = 'avg', normalize = False)
 
 results = model.predict(submission_data)
 results = results.reshape(results.shape[0])

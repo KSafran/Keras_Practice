@@ -4,7 +4,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 def normalize_image(array):
 	return((array + 20) / 40)
 
-def get_image_tensor(df, extra_channel = 'none'):
+def get_image_tensor(df, extra_channel = 'none', normalize = False):
 	''' returns array of images
 	df ~ the input dataframe
 	extra_channel ~ one of ('none', 'diff', 'avg') for 3rd channel
@@ -28,7 +28,9 @@ def get_image_tensor(df, extra_channel = 'none'):
 		band_2[:, :, :, np.newaxis]),
 		axis = 3)
 	
-	all_bands = normalize_image(all_bands)
+	if normalize:
+		all_bands = normalize_image(all_bands)
+	
 	return(all_bands)
 
 def get_callbacks(filepath, patience = 5):
